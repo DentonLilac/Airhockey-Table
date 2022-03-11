@@ -15,4 +15,4 @@ Table construction by Denton Lilac, Anthony Ciamacco, Jacek Burkhart, and Bobby 
 Instruction from our class teacher, Dr. Justin Starr.
 
 ## License
-<a href="https://choosealicense.com/licenses/gpl-3.0/" alt="GPL v3.0">
+<a href="https://choosealicense.com/licenses/gpl-3.0/">GPL v3.0</a>
