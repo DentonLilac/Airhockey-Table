@@ -1,12 +1,12 @@
 #include <FastLED.h>
 
-#define NUM_LEDS 396//480
-#define BRIGHTNESS 100 //SET BRIGHTNESS HERE 
+#define NUM_LEDS 396// Total LEDs on main strip
+#define BRIGHTNESS 75 //SET BRIGHTNESS PERCENTAGE HERE 
 #define LED_DATA_PIN 22
 #define TOP_LED_DATA_PIN 24
 #define BOTTOM_LED_DATA_PIN 25
 
-// START/STOPS TBD
+// START/STOP Points for LEDs by pixel number on the strip they're connected to, starting at 0.
 #define TOP_STRIP_LEFT_START 334
 #define TOP_STRIP_LEFT_END 353
 
@@ -94,7 +94,9 @@ void led_setup()
     for( int i = Top_Strip_Goal_Effect_2_End; i > Top_Strip_Goal_Effect_2_Start; i-- )
     {
       int ij = i % (NUM_LEDS - 1);
-      Serial.println( ij );
+      if( Debug_Mode == true ){ 
+        Serial.println( ij );
+      }
     }
     
 }
@@ -255,13 +257,15 @@ void led_generate_solid_color()
     hsv2rgb_rainbow( hsv1, rgb1 );
     hsv2rgb_rainbow( hsv2, rgb2 );
 
-    Serial.println( "New Color Generated!");
-    Serial.println( RandHue );
-    Serial.println( RandSat );
-    Serial.println( RandVal );
-    Serial.println( RandVar );
-    Serial.print("Oppo: ");
-    Serial.println( (RandHue + 102 + RandVar) % 255 );
+    if( Debug_Mode == true ){ 
+      Serial.println( "New Color Generated!");
+      Serial.println( RandHue );
+      Serial.println( RandSat );
+      Serial.println( RandVal );
+      Serial.println( RandVar );
+      Serial.print("Oppo: ");
+      Serial.println( (RandHue + 102 + RandVar) % 255 );
+    }
     
     //for( int i = 0; i < LEFT_STRIP_START; i++ )
     for( int i = RIGHT_STRIP_END / 2; i < (RIGHT_STRIP_END/2) + LEFT_STRIP_START + 1; i++ )
@@ -643,19 +647,9 @@ void top_score_led_explosion()
     for( int i = Top_Strip_Goal_Effect_1_Start; i < Top_Strip_Goal_Effect_1_End; i++ )
     {
       leds2[i] = leds2[i+1];
-      //leds2[i+1].fadeLightBy( 32 );
     }
     leds2[ Bottom_Strip_Goal_Effect_1_Start ] = CRGB( 0, 0, 0 );
 
-    
-    /*if( random( 0, 5 ) == 3 ){
-        CHSV hsv2( random( 0, 255 ), random( 150, 255 ), 255 );
-        CRGB rgb2;
-        hsv2rgb_rainbow( hsv2, rgb2 );
-        leds2[ Top_Strip_Goal_Effect_2_Start ] = CHSV( random( 0, 255 ), random( 150, 255 ), random( 200, 255 ) );
-    }else{
-        leds2[ Top_Strip_Goal_Effect_2_Start ].fadeLightBy( 32 );
-    }*/
     
     for( int i = Top_Strip_Goal_Effect_2_End; i > Top_Strip_Goal_Effect_2_Start; i-- )
     {
@@ -665,44 +659,12 @@ void top_score_led_explosion()
       }else{
         leds2[ij] = leds2[ij-1];
       }
-      //leds2[i-1].fadeLightBy( 32 );
     }
     leds2[ Top_Strip_Goal_Effect_2_End ] = CRGB( 0, 0, 0 );
 }
 
 void bottom_score_led_explosion()
 {
-    /*
-    int Bottom_Strip_Goal_Effect_1_Start = BOTTOM_STRIP_GOAL_START + 8 - 100;
-    int Bottom_Strip_Goal_Effect_1_End = BOTTOM_STRIP_GOAL_START + 8;
-    int Bottom_Strip_Goal_Effect_2_Start = BOTTOM_STRIP_GOAL_START + 9;
-    int Bottom_Strip_Goal_Effect_2_End = BOTTOM_STRIP_GOAL_START + 9 + 100;
-
-    int Top_Strip_Goal_Effect_1_Start = TOP_STRIP_GOAL_START + 8 - 100;
-    int Top_Strip_Goal_Effect_1_End = TOP_STRIP_GOAL_START + 8;
-    int Top_Strip_Goal_Effect_2_Start = TOP_STRIP_GOAL_START + 9;
-    int Top_Strip_Goal_Effect_2_End = TOP_STRIP_GOAL_START + 9 + 100;
-    */
-    
-
-    /*
-    for( int i = Bottom_Strip_Goal_Effect_1_Start; i < Bottom_Strip_Goal_Effect_1_End; i++ )
-    {
-      float Cos = ( ( cos( (millis() / 50.0) + (float(i)/4) ) + 1.0 ) );
-      float DistFromCenter = (100.0 - abs( (Bottom_Strip_Goal_Effect_1_End) - i )) / 100.0;
-      float Mul = Cos * 80.0 * DistFromCenter;
-      leds2[i] = CRGB( Mul, Mul, 10 );
-      //leds1[i] = leds1[i] * ( 1 - DistFromCenter );
-    }
-
-    for( int i = Bottom_Strip_Goal_Effect_2_Start; i < Bottom_Strip_Goal_Effect_2_End; i++ )
-    {
-      float Cos = ( ( cos( (millis() / 50.0) - (float(i)/4) ) + 1.0 ) );
-      float DistFromCenter = (100.0 - abs( (Bottom_Strip_Goal_Effect_1_End) - i )) / 100.0;
-      float Mul = Cos * 80.0 * DistFromCenter;
-      leds2[i] = CRGB( Mul, Mul, 10 );
-    }
-    */
 
     if( random( 0, 5 ) == 3 ){
         CHSV hsv1( random( 0, 255 ), random( 150, 255 ), 255 );
@@ -721,25 +683,13 @@ void bottom_score_led_explosion()
     for( int i = Bottom_Strip_Goal_Effect_1_Start; i < Bottom_Strip_Goal_Effect_1_End; i++ )
     {
       leds2[i] = leds2[i+1];
-      //leds2[i+1].fadeLightBy( 32 );
     }
     leds2[ Bottom_Strip_Goal_Effect_1_Start ] = CRGB( 0, 0, 0 );
 
-    /*
-    if( random( 0, 5 ) == 3 ){
-        CHSV hsv2( random( 0, 255 ), random( 150, 255 ), 255 );
-        CRGB rgb2;
-        hsv2rgb_rainbow( hsv2, rgb2 );
-        leds2[ Bottom_Strip_Goal_Effect_2_Start ] = CHSV( random( 0, 255 ), random( 150, 255 ), random( 200, 255 ) );
-    }else{
-        leds2[ Bottom_Strip_Goal_Effect_2_Start ].fadeLightBy( 32 );
-    }
-    */
     
     for( int i = Bottom_Strip_Goal_Effect_2_End; i > Bottom_Strip_Goal_Effect_2_Start; i-- )
     {
       leds2[i] = leds2[i-1];
-      //leds2[i-1].fadeLightBy( 32 );
     }
     leds2[ Bottom_Strip_Goal_Effect_2_End ] = CRGB( 0, 0, 0 );
 }
@@ -757,18 +707,6 @@ void led_loop()
     {
         Brightness_Mod = ( float( timer_remaining( LED_Shutdown_Timer ) ) / LED_Startup_Speed ) ;
     }
-
-    /*
-    if( timer_remaining( LED_Fade_In_Timer ) > 0 )
-    {
-      if( timer_remaining( LED_Fade_In_Timer ) < 750 )
-      {
-          Brightness_Mod = ( (LED_Fade_In_Speed - 3000) - float( timer_remaining( LED_Fade_In_Timer ) ) ) / (LED_Fade_In_Speed - 3000);
-      }else{
-          Brightness_Mod = 0.01;
-      }
-    }
-    */
     
     if( timer_remaining( LED_Shutdown_Timer ) == 0 && timer_remaining( LED_Startup_Timer ) == 0 && GameMode != 0 )
     {

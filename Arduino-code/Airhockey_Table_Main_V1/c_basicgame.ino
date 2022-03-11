@@ -27,11 +27,14 @@ void collect_light_sample()
     TopGoal2SenSamples[ Current_Light_Sample ] = Top_Goal2_Sensor_Data;
     BottomGoal1SenSamples[ Current_Light_Sample ] = Bottom_Goal1_Sensor_Data;
     //BottomGoal2SenSamples[ Current_Light_Sample ] = Bottom_Goal2_Sensor_Data;
-    //Serial.println( analogRead( Left_Sensor ) );
-    //Serial.print("Samp '");
-    //Serial.print( Current_Light_Sample );
-    //Serial.print("' Data: ");
-    //Serial.println( Left_Sensor_Data );
+
+    if( Debug_Mode == true ){ 
+      Serial.println( analogRead( Left_Sensor ) );
+      Serial.print("Samp '");
+      Serial.print( Current_Light_Sample );
+      Serial.print("' Data: ");
+      Serial.println( Left_Sensor_Data );
+    }
 
     Current_Light_Sample = Current_Light_Sample + 1;
     if( Current_Light_Sample >= Light_Samples ){
@@ -73,7 +76,6 @@ void collect_light_sample()
         //}else{
         //  LeftSenAvg = LeftSenAvg + 680;
         //}
-        //Serial.print(" EAT THE RICH: ");
         //Serial.println( LeftSenSamples[i] );
       }
       TopSenAvg = int( floorf( TopSenAvg / Light_Samples ) );
@@ -84,12 +86,14 @@ void collect_light_sample()
       TopGoal1SenAvg = int( floorf( TopGoal1SenAvg / Light_Samples ) );
       TopGoal2SenAvg = int( floorf( TopGoal2SenAvg / Light_Samples ) );
       //BottomGoal1SenAvg = int( floorf( BottomGoal1SenAvg / Light_Samples ) );
-      Serial.print( BottomGoal1SenAvg );
-      Serial.print( " / " );
-      Serial.print( Light_Samples );
-      Serial.print( " = " );
+      if( Debug_Mode == true ){ 
+        Serial.print( BottomGoal1SenAvg );
+        Serial.print( " / " );
+        Serial.print( Light_Samples );
+        Serial.print( " = " );
+      }
       BottomGoal1SenAvg = int( floorf( BottomGoal1SenAvg / Light_Samples ) );
-      Serial.println( BottomGoal1SenAvg );
+      //Serial.println( BottomGoal1SenAvg );
 
       //Sometimes we get weird averages that loop all the way around to max int val... soooo dirty fix. Shhhh don't tell.
 

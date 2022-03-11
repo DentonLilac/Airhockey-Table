@@ -16,10 +16,14 @@ int Bottom_Sensor = A9; //bottom led sensor
 int Top_Sensor = A10; // top led sensor
 */
 
+//Change to true to enable serial printing of debug data.
+bool Debug_Mode = false;
 
+//Two sensors per goal for increased accuracy.
 int Top_Goal1_Sensor = A0; //Top goal #1
 int Top_Goal2_Sensor = A1; //Top goal #2
 int Bottom_Goal1_Sensor = A2; //Bottom goal #1
+
 //int Bottom_Goal2_Sensor = A3; //Bottom goal #1
 int Left_Sensor = A4; //left side Led sensor
 int Right_Sensor = A5; //Right side led sensor
@@ -110,22 +114,22 @@ bool ShuttingDown = false;
 bool StartingUp = false;
 
 //Output digital pins to control the 5V Relay to power the Blower motor fans and the LED/laser Power Supply Unit.
-int fan_relay = 4;
-int psu_relay = 2;
+int Fan_Relay = 4;
+int PSU_Relay = 2;
 
 //Photoresistor light threshold drop below average level before triggering event. Light_Threshold is for side table lasers, and Light_Threshold2 is for the average drop in goal sensors.
 int Light_Threshold = 40; //25
 int Light_Threshold2= 70;
 
-//start_button indicates the digital pin for the table's on/off power button.
-int start_button=7;
+//Start_Button indicates the digital pin for the table's on/off power button.
+int Start_Button=7;
 
 //Mode_button was going to be a seperate button on the table to change gamemodes.. but that idea got axed in construction.
 //int mode_button=22;
 //bool mode_button_held=false;
 
 //Pin to control the output color to strobe the LED light on the power button.
-int power_led=10;
+int Power_Led=10;
 
 
 
@@ -174,17 +178,17 @@ void setup() {
 
   Serial.begin(115200);
   
-  pinMode(start_button, INPUT_PULLUP);
+  pinMode(Start_Button, INPUT_PULLUP);
   //pinMode(mode_button, INPUT);
-  pinMode(power_led, OUTPUT);
+  pinMode(Power_Led, OUTPUT);
 
-  pinMode(fan_relay, OUTPUT);
-  pinMode(psu_relay, OUTPUT);
+  pinMode(Fan_Relay, OUTPUT);
+  pinMode(PSU_Relay, OUTPUT);
 
   //Turn off all relays on first boot, just to make sure.
-  digitalWrite(fan_relay, LOW);
-  digitalWrite(psu_relay, LOW);
-  digitalWrite(power_led, LOW);
+  digitalWrite(Fan_Relay, LOW);
+  digitalWrite(PSU_Relay, LOW);
+  digitalWrite(Power_Led, LOW);
   //Serial.begin(115200);
   
 
@@ -211,8 +215,8 @@ void DoShutdown()
     {
         GameMode = 0;
         //led_reset();
-        digitalWrite(psu_relay, LOW);
-        digitalWrite(power_led, LOW);
+        digitalWrite(PSU_Relay, LOW);
+        digitalWrite(Power_Led, LOW);
         ShuttingDown = false;
 
         Top_Score = 0;
@@ -252,14 +256,14 @@ void loop() {
       start_light_sample();
     }
 
-    //Call to update video rendering... if it was used.
+    //Call to update video rendering... if it was used. Removed due to project time and budget constraints.
     //video_loop();
 
     //StartingUp is true as long as the startup timer is running.
     StartingUp = timer_running( LED_Startup_Timer );
 
     //If power button is on/down.
-    if(digitalRead(start_button)==LOW){
+    if(digitalRead(Start_Button)==LOW){
 
       //Is the gamemode is default 0, and not in the process of shutting down, and not Automatically turned off, start turn on process.
       if( GameMode == 0 && ShuttingDown == false && Auto_Off == false ){
@@ -267,11 +271,11 @@ void loop() {
         StartingUp = true;
         led_generate_default();
         //Turn on fans.
-        digitalWrite(fan_relay, HIGH);
+        digitalWrite(Fan_Relay, HIGH);
         delay(500);
         //Turn on LED/Laser PSU and turn on the power button LED.
-        digitalWrite(psu_relay, HIGH);
-        digitalWrite(power_led, HIGH);
+        digitalWrite(PSU_Relay, HIGH);
+        digitalWrite(Power_Led, HIGH);
         //Initiate LED startup to slowly fade them in.
         led_startup_timer();
         timer_start( LED_Game_Start_Timer, 2000 );
@@ -295,7 +299,7 @@ void loop() {
       if(GameMode!=0){
 
         //Keep power LED solid while on.
-        analogWrite( power_led, 255 );
+        analogWrite( Power_Led, 255 );
 
         //Execute main game update loop.
         gameloop();
@@ -304,11 +308,13 @@ void loop() {
         //Serial.println( timer_remaining( Light_Samples_Timer ));
         if( timer_running( Auto_Off_Timer ) == false && Auto_Off == false && Auto_Off_Enabled == true )
         {
-            Serial.println( "Automatically shutting table off due to inactivity." );
+            if( Debug_Mode == true ){ 
+              Serial.println( "Automatically shutting table off due to inactivity." );
+            }
             Auto_Off = true;
             led_shutdown_timer();
             ShuttingDown = true;
-            digitalWrite(fan_relay, LOW);
+            digitalWrite(Fan_Relay, LOW);
         }
         
         
@@ -321,7 +327,7 @@ void loop() {
   
       if( GameMode == 0 ){
         //Strobe power button LED on and off to show people where the dang switch to turn this heckin' thing on is.
-        analogWrite( power_led, ( cos( float( millis() / 150.0 ) ) + 1.0 ) * 127.5 );
+        analogWrite( Power_Led, ( cos( float( millis() / 150.0 ) ) + 1.0 ) * 127.5 );
         //Serial.println( ( cos( float( millis() / 150.0 ) ) + 1.0 ) * 127.5 );
         if( ShuttingDown == true ){
           DoShutdown();
@@ -334,7 +340,7 @@ void loop() {
         if( ShuttingDown == false ){
           led_shutdown_timer();
           ShuttingDown = true;
-          digitalWrite(fan_relay, LOW);
+          digitalWrite(Fan_Relay, LOW);
         }
         DoShutdown();
       }
@@ -342,6 +348,7 @@ void loop() {
     //LED EFFECTS
 
     if( millis() > 3000 ){
+      
     //Serial.print( timer_running( Light_Samples_Timer ) );
     //Serial.print( Current_Light_Sample );
     //Serial.print(" ");
@@ -349,55 +356,56 @@ void loop() {
     //Serial.print(" ");
   
 
-    /*
-    Serial.print( Top_Sensor_Data );
-    Serial.print(" ");
-    Serial.print( Right_Sensor_Data );
-    Serial.print(" ");
-    Serial.print( Bottom_Sensor_Data );
-    Serial.print(" ");
-    Serial.print( Left_Sensor_Data );
-    Serial.print(" ");
-  
-    Serial.print( TopSenAvg );
-    Serial.print(" ");
-    Serial.print( RightSenAvg );
-    Serial.print(" ");
-    Serial.print( BottomSenAvg );
-    Serial.print(" ");
-    Serial.println( LeftSenAvg );
-    */
-    
-  
-    /*
-    Serial.print( Top_Goal1_Sensor_Data );
-    Serial.print(" ");
-  
-    Serial.print( TopGoal1SenAvg );
-    Serial.print(" ");
-  
-    Serial.print( Top_Goal2_Sensor_Data );
-    Serial.print(" ");
-  
-    Serial.print( TopGoal2SenAvg );
-    Serial.print(" ");
-  
-    Serial.print( Bottom_Goal1_Sensor_Data );
-    Serial.print(" ");
-  
-    Serial.println( BottomGoal1SenAvg );
-    */
-    
-  
-    //Serial.print( "GM: " );
-    //Serial.println( GameMode );
-    //Serial.print(" ");
-    
-    //Serial.print(" ");
-    //Serial.println( 800);
-  
-    //Serial.println( LeftSenAvg );
-   
+      if( Debug_Mode == true ){ 
+        
+        Serial.print( Top_Sensor_Data );
+        Serial.print(" ");
+        Serial.print( Right_Sensor_Data );
+        Serial.print(" ");
+        Serial.print( Bottom_Sensor_Data );
+        Serial.print(" ");
+        Serial.print( Left_Sensor_Data );
+        Serial.print(" ");
+      
+        Serial.print( TopSenAvg );
+        Serial.print(" ");
+        Serial.print( RightSenAvg );
+        Serial.print(" ");
+        Serial.print( BottomSenAvg );
+        Serial.print(" ");
+        Serial.println( LeftSenAvg );
+        
+        
+      
+        
+        Serial.print( Top_Goal1_Sensor_Data );
+        Serial.print(" ");
+      
+        Serial.print( TopGoal1SenAvg );
+        Serial.print(" ");
+      
+        Serial.print( Top_Goal2_Sensor_Data );
+        Serial.print(" ");
+      
+        Serial.print( TopGoal2SenAvg );
+        Serial.print(" ");
+      
+        Serial.print( Bottom_Goal1_Sensor_Data );
+        Serial.print(" ");
+      
+        Serial.println( BottomGoal1SenAvg );
+        
+        
+      
+        //Serial.print( "GM: " );
+        //Serial.println( GameMode );
+        //Serial.print(" ");
+        
+        //Serial.print(" ");
+        //Serial.println( 800);
+      
+        //Serial.println( LeftSenAvg );
+      }
     
     }
   
@@ -407,6 +415,8 @@ void loop() {
 
 void renew_auto_off_timer()
 {
-  Serial.println( "Auto-off Timer Renewed!" );
+  if( Debug_Mode == true ){ 
+    Serial.println( "Auto-off Timer Renewed!" );
+  }
   timer_start( Auto_Off_Timer, Auto_Off_Time );
 }
